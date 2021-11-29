@@ -74,16 +74,16 @@ type VIPCard struct {
 
 type CurriculumCustomer struct {
 	gorm.Model
-	ID         uint       `gorm:"primaryKey; autoIncrement"`
-	Customer   uint   `gorm:"foreignKey: ID"`
+	ID         uint `gorm:"primaryKey; autoIncrement"`
+	Customer   uint `gorm:"foreignKey: ID"`
 	Curriculum uint `gorm:"foreignKey: ID"`
 	Attendance uint
 }
 
 type CurriculumTrainer struct {
 	gorm.Model
-	ID         uint       `gorm:"primaryKey; autoIncrement"`
-	Trainer    uint    `gorm:"foreignKey: ID"`
+	ID         uint `gorm:"primaryKey; autoIncrement"`
+	Trainer    uint `gorm:"foreignKey: ID"`
 	Curriculum uint `gorm:"foreignKey: ID"`
 	LastClass  time.Time
 }
@@ -116,9 +116,9 @@ type DailyIntake struct {
 
 type MaintainerEquipment struct {
 	gorm.Model
-	ID                uint       `gorm:"primaryKey; autoIncrement"`
+	ID                uint `gorm:"primaryKey; autoIncrement"`
 	MaintainerOfEquip uint `gorm:"foreignKey: ID"`
-	Equipment         uint  `gorm:"foreignKey: ID"`
+	Equipment         uint `gorm:"foreignKey: ID"`
 	LastMaintain      time.Time
 }
 
@@ -132,8 +132,8 @@ type FoodRank struct {
 
 type DailyIntakeFood struct {
 	gorm.Model
-	ID          uint        `gorm:"primaryKey; autoIncrement"`
-	Food        uint        `gorm:"foreignKey: ID"`
+	ID          uint `gorm:"primaryKey; autoIncrement"`
+	Food        uint `gorm:"foreignKey: ID"`
 	DailyIntake uint `gorm:"foreignKey: ID"`
 	Amount      uint
 }
@@ -161,7 +161,6 @@ func main() {
 	db.AutoMigrate(&MaintainerEquipment{})
 	db.AutoMigrate(&FoodRank{})
 	db.AutoMigrate(&DailyIntakeFood{})
-
 
 	// Create
 
