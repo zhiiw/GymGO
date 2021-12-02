@@ -8,16 +8,26 @@ import (
 
 type Employee struct {
 	gorm.Model
-	ID       uint `gorm:"primaryKey; autoIncrement"`
-	UserName string
-	Password string
+	ID        uint `gorm:"primaryKey; autoIncrement"`
+	Name      string
+	UserName  string
+	Password  string
+	Salary    float64
+	Address   string
+	Gender    string
+	Email     string
+	Photo     string
+	EntryTime string
+	Img       string
+	Birthday  time.Time
 }
 
-type Trainer struct {
+type Coach struct {
 	gorm.Model
 	ID            uint `gorm:"primaryKey; autoIncrement"`
 	AvailableTime string
 	Speciality    string
+	NickName      string
 	Employee      uint `gorm:"foreignKey:ID"`
 }
 
@@ -32,6 +42,7 @@ type Manager struct {
 type Maintainer struct {
 	gorm.Model
 	ID       uint `gorm:"primaryKey; autoIncrement"`
+	Type     string
 	Employee uint `gorm:"foreignKey:ID"`
 }
 
@@ -43,6 +54,15 @@ type Equipment struct {
 	Img  string
 }
 
+type MaintainerEquipment struct {
+	gorm.Model
+	ID           uint `gorm:"primaryKey; autoIncrement"`
+	MaintainerId uint `gorm:"foreignKey: ID"`
+	EquipmentId  uint `gorm:"foreignKey: ID"`
+	MaintainTime time.Time
+	Description  string
+}
+
 type Customer struct {
 	gorm.Model
 	ID                    uint `gorm:"primaryKey; autoIncrement"`
@@ -51,17 +71,16 @@ type Customer struct {
 	RegisterTime          time.Time
 	ManagerOfCustomer     uint `gorm:"foreignKey:ID"`
 	Weight                float64
-	Bodyfat               float64
+	BodyFat               float64
 	CalculatedDailyIntake string
 }
 
 type Curriculum struct {
 	gorm.Model
-	ID   uint `gorm:"primaryKey; autoIncrement"`
-	Name string
-	Type string
-	Size string
-	Time time.Time
+	ID      uint `gorm:"primaryKey; autoIncrement"`
+	Name    string
+	Type    string
+	CoachId uint `gorm:"foreignKey:ID"`
 }
 
 type VIPCard struct {
@@ -69,23 +88,48 @@ type VIPCard struct {
 	ID         uint `gorm:"primaryKey; autoIncrement"`
 	Balance    float64
 	Due        time.Time
+	Level      uint
+	TotalSpend float64
 	CustomerId uint `gorm:"foreignKey:ID"`
 }
 
 type CurriculumCustomer struct {
 	gorm.Model
-	ID         uint `gorm:"primaryKey; autoIncrement"`
-	Customer   uint `gorm:"foreignKey: ID"`
-	Curriculum uint `gorm:"foreignKey: ID"`
-	Attendance uint
+	ID           uint `gorm:"primaryKey; autoIncrement"`
+	CustomerID   uint `gorm:"foreignKey: ID"`
+	CurriculumID uint `gorm:"foreignKey: ID"`
+	Attendance   uint
 }
 
-type CurriculumTrainer struct {
+type CurriculumRecord struct {
 	gorm.Model
-	ID         uint `gorm:"primaryKey; autoIncrement"`
-	Trainer    uint `gorm:"foreignKey: ID"`
-	Curriculum uint `gorm:"foreignKey: ID"`
-	LastClass  time.Time
+	ID             uint `gorm:"primaryKey; autoIncrement"`
+	CustomerID     uint `gorm:"foreignKey: ID"`
+	CurriculumID   uint `gorm:"foreignKey: ID"`
+	AttendanceTime time.Time
+	Rating         uint
+	Description    string
+}
+
+type CalculatedIntake struct {
+	gorm.Model
+	ID               uint `gorm:"primaryKey; autoIncrement"`
+	Customer         uint
+	BreakfastEnergy  float64
+	BreakfastFat     float64
+	BreakfastProtein float64
+	BreakfastCarbo   float64
+	BreakfastSurge   float64
+	LunchEnergy      float64
+	LunchFat         float64
+	LunchProtein     float64
+	LunchCarbo       float64
+	LunchSurge       float64
+	SupperEnergy     float64
+	SupperFat        float64
+	SupperProtein    float64
+	SupperCarbo      float64
+	SupperSurge      float64
 }
 
 type Food struct {
@@ -114,20 +158,12 @@ type DailyIntake struct {
 	MealType string
 }
 
-type MaintainerEquipment struct {
-	gorm.Model
-	ID                uint `gorm:"primaryKey; autoIncrement"`
-	MaintainerOfEquip uint `gorm:"foreignKey: ID"`
-	Equipment         uint `gorm:"foreignKey: ID"`
-	LastMaintain      time.Time
-}
-
 type FoodRank struct {
 	gorm.Model
-	ID         uint `gorm:"primaryKey; autoIncrement"`
-	Food       uint `gorm:"foreignKey: ID"`
-	Rank       uint
-	Desciption string
+	ID          uint `gorm:"primaryKey; autoIncrement"`
+	Food        uint `gorm:"foreignKey: ID"`
+	Rank        uint
+	Description string
 }
 
 type DailyIntakeFood struct {
@@ -146,7 +182,7 @@ func main() {
 
 	// Migrate the schema
 	db.AutoMigrate(&Employee{})
-	db.AutoMigrate(&Trainer{})
+	db.AutoMigrate(&Coach{})
 	db.AutoMigrate(&Manager{})
 	db.AutoMigrate(&Maintainer{})
 	db.AutoMigrate(&Equipment{})
@@ -154,12 +190,13 @@ func main() {
 	db.AutoMigrate(&Curriculum{})
 	db.AutoMigrate(&VIPCard{})
 	db.AutoMigrate(&CurriculumCustomer{})
-	db.AutoMigrate(&CurriculumTrainer{})
 	db.AutoMigrate(&Food{})
 	db.AutoMigrate(&Nutrition{})
 	db.AutoMigrate(&DailyIntake{})
 	db.AutoMigrate(&MaintainerEquipment{})
 	db.AutoMigrate(&FoodRank{})
+	db.AutoMigrate(&CalculatedIntake{})
+	db.AutoMigrate(&CurriculumRecord{})
 	db.AutoMigrate(&DailyIntakeFood{})
 
 	// Create
