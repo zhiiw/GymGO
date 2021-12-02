@@ -28,7 +28,7 @@ type Coach struct {
 	AvailableTime string
 	Speciality    string
 	NickName      string
-	Employee      uint `gorm:"foreignKey:ID"`
+	Employee      Employee `gorm:"FOREIGNKEY:ID"`
 }
 
 type Manager struct {
@@ -36,14 +36,14 @@ type Manager struct {
 	ID          uint `gorm:"primaryKey; autoIncrement"`
 	RegisterCnt uint
 	TotalIncome float64
-	Employee    uint `gorm:"foreignKey:ID"`
+	Employee    Employee `gorm:"FOREIGNKEY:ID"`
 }
 
 type Maintainer struct {
 	gorm.Model
 	ID       uint `gorm:"primaryKey; autoIncrement"`
 	Type     string
-	Employee uint `gorm:"foreignKey:ID"`
+	Employee Employee `gorm:"FOREIGNKEY:ID"`
 }
 
 type Equipment struct {
@@ -56,9 +56,9 @@ type Equipment struct {
 
 type MaintainerEquipment struct {
 	gorm.Model
-	ID           uint `gorm:"primaryKey; autoIncrement"`
-	MaintainerId uint `gorm:"foreignKey: ID"`
-	EquipmentId  uint `gorm:"foreignKey: ID"`
+	ID           uint       `gorm:"primaryKey; autoIncrement"`
+	Maintainer   Maintainer `gorm:"FOREIGNKEY:ID"`
+	Equipment    Equipment  `gorm:"FOREIGNKEY:ID"`
 	MaintainTime time.Time
 	Description  string
 }
@@ -69,7 +69,7 @@ type Customer struct {
 	UserName              string
 	PassWord              string
 	RegisterTime          time.Time
-	ManagerOfCustomer     uint `gorm:"foreignKey:ID"`
+	ManagerOfCustomer     Manager `gorm:"FOREIGNKEY:ID"`
 	Weight                float64
 	BodyFat               float64
 	CalculatedDailyIntake string
@@ -77,10 +77,10 @@ type Customer struct {
 
 type Curriculum struct {
 	gorm.Model
-	ID      uint `gorm:"primaryKey; autoIncrement"`
-	Name    string
-	Type    string
-	CoachId uint `gorm:"foreignKey:ID"`
+	ID    uint `gorm:"primaryKey; autoIncrement"`
+	Name  string
+	Type  string
+	Coach Coach `gorm:"FOREIGNKEY:ID"`
 }
 
 type VIPCard struct {
@@ -90,22 +90,22 @@ type VIPCard struct {
 	Due        time.Time
 	Level      uint
 	TotalSpend float64
-	CustomerId uint `gorm:"foreignKey:ID"`
+	Customer   Customer `gorm:"FOREIGNKEY:ID"`
 }
 
 type CurriculumCustomer struct {
 	gorm.Model
-	ID           uint `gorm:"primaryKey; autoIncrement"`
-	CustomerID   uint `gorm:"foreignKey: ID"`
-	CurriculumID uint `gorm:"foreignKey: ID"`
-	Attendance   uint
+	ID         uint       `gorm:"primaryKey; autoIncrement"`
+	Customer   Customer   `gorm:"FOREIGNKEY:ID"`
+	Curriculum Curriculum `gorm:"FOREIGNKEY:ID"`
+	Attendance uint
 }
 
 type CurriculumRecord struct {
 	gorm.Model
-	ID             uint `gorm:"primaryKey; autoIncrement"`
-	CustomerID     uint `gorm:"foreignKey: ID"`
-	CurriculumID   uint `gorm:"foreignKey: ID"`
+	ID             uint       `gorm:"primaryKey; autoIncrement"`
+	Customer       Customer   `gorm:"FOREIGNKEY:ID"`
+	Curriculum     Curriculum `gorm:"FOREIGNKEY:ID"`
 	AttendanceTime time.Time
 	Rating         uint
 	Description    string
@@ -134,7 +134,7 @@ type CalculatedIntake struct {
 
 type Food struct {
 	gorm.Model
-	ID       uint `gorm:"primaryKey; autoIncrement"`
+	ID       uint `gorm:"primaryKey;autoIncrement"`
 	Name     string
 	Unit     float64
 	Calories float64
@@ -143,61 +143,50 @@ type Food struct {
 
 type Nutrition struct {
 	gorm.Model
-	ID      uint `gorm:"primaryKey; autoIncrement"`
-	Type    string
-	Amount  float64
-	Unit    float64
-	FoodRef uint `gorm:"foreignKey: ID"`
+	ID     uint `gorm:"primaryKey; autoIncrement"`
+	Type   string
+	Amount float64
+	Unit   float64
+	Food   Food `gorm:"FOREIGNKEY:ID"`
 }
 
 type DailyIntake struct {
 	gorm.Model
 	ID       uint `gorm:"primaryKey; autoIncrement"`
 	Date     time.Time
-	Customer uint `gorm:"foreignKey: ID"`
+	Customer Customer `gorm:"FOREIGNKEY:ID"`
 	MealType string
 }
 
 type FoodRank struct {
 	gorm.Model
 	ID          uint `gorm:"primaryKey; autoIncrement"`
-	Food        uint `gorm:"foreignKey: ID"`
+	Food        Food `gorm:"foreignKey:ID"`
 	Rank        uint
 	Description string
 }
 
 type DailyIntakeFood struct {
 	gorm.Model
-	ID          uint `gorm:"primaryKey; autoIncrement"`
-	Food        uint `gorm:"foreignKey: ID"`
-	DailyIntake uint `gorm:"foreignKey: ID"`
+	ID          uint        `gorm:"primaryKey; autoIncrement"`
+	Food        Food        `gorm:"foreignKey:ID"`
+	DailyIntake DailyIntake `gorm:"foreignKey:ID"`
 	Amount      uint
 }
 
 func main() {
+
 	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	db.Exec("PRAGMA foreign_keys = ON")
 	if err != nil {
 		panic("failed to connect database")
 	}
 
 	// Migrate the schema
-	db.AutoMigrate(&Employee{})
-	db.AutoMigrate(&Coach{})
-	db.AutoMigrate(&Manager{})
-	db.AutoMigrate(&Maintainer{})
-	db.AutoMigrate(&Equipment{})
-	db.AutoMigrate(&Customer{})
-	db.AutoMigrate(&Curriculum{})
-	db.AutoMigrate(&VIPCard{})
-	db.AutoMigrate(&CurriculumCustomer{})
-	db.AutoMigrate(&Food{})
-	db.AutoMigrate(&Nutrition{})
-	db.AutoMigrate(&DailyIntake{})
-	db.AutoMigrate(&MaintainerEquipment{})
-	db.AutoMigrate(&FoodRank{})
-	db.AutoMigrate(&CalculatedIntake{})
-	db.AutoMigrate(&CurriculumRecord{})
-	db.AutoMigrate(&DailyIntakeFood{})
+	err = db.AutoMigrate(&Employee{}, &Coach{}, &Manager{}, &Maintainer{}, &Equipment{}, &MaintainerEquipment{}, &Customer{}, &Curriculum{}, &VIPCard{}, &CurriculumCustomer{}, &CurriculumRecord{}, &CalculatedIntake{}, &Food{}, &Nutrition{}, &DailyIntake{}, &FoodRank{}, &DailyIntakeFood{}, &CalculatedIntake{}, &CurriculumRecord{})
+	if err != nil {
+		return
+	}
 
 	// Create
 
